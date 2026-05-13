@@ -55,6 +55,7 @@ class _SpielDetailScreenState extends State<SpielDetailScreen> {
 
   Future<void> _treffpunktSetzen(Spiel s) async {
     final ortCtl = TextEditingController(text: s.treffpunktOrt ?? '');
+    final notizCtl = TextEditingController(text: s.notiz ?? '');
     DateTime? zeit = s.treffpunktZeit;
     if (!mounted) return;
     await showDialog(
@@ -72,6 +73,14 @@ class _SpielDetailScreenState extends State<SpielDetailScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Ort',
                   prefixIcon: Icon(Icons.place_outlined),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: notizCtl,
+                decoration: const InputDecoration(
+                  labelText: 'Notiz / Wer kommt direkt?',
+                  prefixIcon: Icon(Icons.notes_outlined),
                 ),
               ),
               const SizedBox(height: 12),
@@ -118,14 +127,186 @@ class _SpielDetailScreenState extends State<SpielDetailScreen> {
             FilledButton(
               onPressed: () async {
                 await context.read<ApiClient>().setzeTreffpunkt(
-                      widget.spielId,
-                      ort: ortCtl.text.isEmpty ? null : ortCtl.text,
-                      zeit: zeit,
-                    );
+                       widget.spielId,
+                       ort: ortCtl.text.isEmpty ? null : ortCtl.text,
+                       zeit: zeit,
+                       notiz: notizCtl.text.isEmpty ? null : notizCtl.text,
+                     );
                 if (ctx.mounted) Navigator.pop(ctx);
                 _refresh();
               },
               child: const Text('Speichern'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _aufstellungBearbeiten(Spiel s) async {
+    final api = context.read<ApiClient>();
+    final alleSpieler = await api.spieler();
+    if (alleSpieler.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Keine Spieler vorhanden.')),
+      );
+      return;
+    }
+    final selected = List<int?>.generate(
+      4,
+      (index) => index < s.aufstellung.length
+          ? s.aufstellung[index].spielerId
+          : (alleSpieler.isNotEmpty ? alleSpieler.first.id : null),
+    );
+    var freigeben = s.aufstellungFreigegeben;
+    List<String> warnungen = [];
+    List<String> fehler = [];
+
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateLocal) {
+          final eintraege = List.generate(
+            4,
+            (index) => AufstellungEintrag(
+              position: index + 1,
+              spielerId: selected[index] ?? alleSpieler.first.id,
+            ),
+          );
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Text('Aufstellung bearbeiten'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < 4; i++) ...[
+                    DropdownButtonFormField<int>(
+                      value: selected[i],
+                      decoration: InputDecoration(labelText: 'Position ${i + 1}'),
+                      items: alleSpieler
+                          .map(
+                            (p) => DropdownMenuItem(
+                              value: p.id,
+                              child: Text('${p.name} · TTR ${p.ttr ?? '-'}'),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setStateLocal(() => selected[i] = v),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Direkt freigeben'),
+                    value: freigeben,
+                    onChanged: (v) => setStateLocal(() => freigeben = v),
+                  ),
+                  for (final text in warnungen)
+                    _dialogMessage(text, AppColors.statusOffen),
+                  for (final text in fehler)
+                    _dialogMessage(text, AppColors.statusAbgesagt),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Abbrechen')),
+              TextButton(
+                onPressed: () async {
+                  final result = await api.aufstellungValidieren(
+                    widget.spielId,
+                    eintraege,
+                    freigeben: freigeben,
+                  );
+                  setStateLocal(() {
+                    warnungen = (result['warnungen'] as List? ?? [])
+                        .map((e) => '$e')
+                        .toList();
+                    fehler = (result['fehler'] as List? ?? [])
+                        .map((e) => '$e')
+                        .toList();
+                  });
+                },
+                child: const Text('Validieren'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  await api.aufstellungSetzen(
+                    widget.spielId,
+                    eintraege,
+                    freigeben: freigeben,
+                  );
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  _refresh();
+                },
+                child: const Text('Speichern'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _dialogMessage(String text, Color color) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(text, style: TextStyle(color: color)),
+    );
+  }
+
+  Future<void> _ersatzAnfragen(Spiel s) async {
+    if (s.aufstellung.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Es gibt noch keine Aufstellung.')),
+      );
+      return;
+    }
+    var position = s.aufstellung.first.position;
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateLocal) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Ersatzspieler anfragen'),
+          content: DropdownButtonFormField<int>(
+            value: position,
+            decoration: const InputDecoration(labelText: 'Position'),
+            items: s.aufstellung
+                .map(
+                  (e) => DropdownMenuItem(
+                    value: e.position,
+                    child: Text('Position ${e.position}'),
+                  ),
+                )
+                .toList(),
+            onChanged: (v) => setStateLocal(() => position = v ?? position),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Abbrechen')),
+            FilledButton(
+              onPressed: () async {
+                await context
+                    .read<ApiClient>()
+                    .ersatzNaechster(widget.spielId, position: position);
+                if (ctx.mounted) Navigator.pop(ctx);
+                _refresh();
+              },
+              child: const Text('Anfragen'),
             ),
           ],
         ),
@@ -184,7 +365,9 @@ class _SpielDetailScreenState extends State<SpielDetailScreen> {
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Row(
+                    child: Column(
+                      children: [
+                    Row(
                       children: [
                         Container(
                           width: 40,
@@ -208,6 +391,28 @@ class _SpielDetailScreenState extends State<SpielDetailScreen> {
                           onPressed: () => _treffpunktSetzen(s),
                           child: const Text('Öffnen'),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _aufstellungBearbeiten(s),
+                            icon: const Icon(Icons.format_list_numbered),
+                            label: const Text('Aufstellung'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _ersatzAnfragen(s),
+                            icon: const Icon(Icons.person_search),
+                            label: const Text('Ersatz'),
+                          ),
+                        ),
+                      ],
+                    ),
                       ],
                     ),
                   ),
