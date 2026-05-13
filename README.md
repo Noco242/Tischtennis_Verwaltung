@@ -1,5 +1,6 @@
 # TT-Match-Manager
 
+# !!! VERWENDEN SIE DAS PROJEKT NICHT OHNE ABSPRACHE MIT ALLEN INHABERN (Noah, Luca, Sheila, Lando) !!!
 Cross-Platform-App zur Tischtennis-Vereinsverwaltung gemaess Pflichtenheft V2
 (`Vorgaben/Pflichtenheft_TT_Match_Manager.docx`).
 
