@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

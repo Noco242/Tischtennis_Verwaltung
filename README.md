@@ -1,5 +1,7 @@
 # TT-Match-Manager
 
+Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 Cross-Platform-App zur Tischtennis-Vereinsverwaltung gemaess Pflichtenheft V2
 (`Vorgaben/Pflichtenheft_TT_Match_Manager.docx`).
 
@@ -92,6 +94,36 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Swagger-UI: http://localhost:8000/docs
+
+### Deployment-Check-in
+
+Das Backend enthaelt einen transparenten Deployment-Check-in. Er ist
+standardmaessig aktiv, sendet aber nur dann Pings, wenn eine Ziel-URL gesetzt
+ist. Das Backend meldet sich beim Start und danach alle 2 Stunden. Das
+Frontend meldet sich beim Laden der App und danach alle 2 Stunden ueber das
+Backend, damit der Discord-Webhook nicht im Browser-Code offengelegt wird:
+
+```powershell
+DEPLOYMENT_ID=verein-prod
+DEPLOYMENT_CHECKIN_ENABLED=true
+DEPLOYMENT_CHECKIN_URL=https://example.org/ttmm-checkin
+DEPLOYMENT_CHECKIN_INTERVAL_SECONDS=7200
+```
+
+Discord-Webhooks werden automatisch erkannt und als Discord-Nachricht mit Embed
+gesendet. Andere HTTPS-Ziele erhalten das rohe JSON. Gesendet werden nur
+App-Name, Version, Deployment-ID, Zeitstempel, Laufzeit, IP-Informationen und
+Copyright-/Nutzungshinweis.
+Ohne `DEPLOYMENT_CHECKIN_URL` oder mit `DEPLOYMENT_CHECKIN_ENABLED=false`
+findet keine externe Uebertragung statt.
+
+Das Frontend kann bei Bedarf per Dart-Define deaktiviert oder anders getaktet
+werden:
+
+```powershell
+flutter run --dart-define=FRONTEND_CHECKIN_ENABLED=false
+flutter run --dart-define=FRONTEND_CHECKIN_INTERVAL_SECONDS=7200
+```
 
 ### 4. Tests
 

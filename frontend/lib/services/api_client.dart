@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,6 +73,23 @@ class ApiClient {
       if (j is Map && j['detail'] != null) msg = j['detail'].toString();
     } catch (_) {}
     throw ApiException(r.statusCode, msg);
+  }
+
+  Future<void> frontendCheckin({
+    required String event,
+    required int runtimeSeconds,
+    String? pageUrl,
+  }) async {
+    final r = await http.post(
+      _u('/meta/frontend-checkin'),
+      headers: _headers(auth: false),
+      body: jsonEncode({
+        'event': event,
+        'runtime_seconds': runtimeSeconds,
+        if (pageUrl != null) 'page_url': pageUrl,
+      }),
+    );
+    await _send(r);
   }
 
   Future<void> login(String email, String passwort) async {

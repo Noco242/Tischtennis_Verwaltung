@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 from pydantic import BaseModel, EmailStr
 
 from ..models.enums import Rolle

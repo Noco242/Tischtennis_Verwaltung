@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 from .enums import Rolle, SpielerStatus, ZusageStatus
 from .models import (
     Spieler,

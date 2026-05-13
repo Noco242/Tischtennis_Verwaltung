@@ -1,0 +1,7 @@
+INFO:     Started server process [163932]
+INFO:     Waiting for application startup.
+2026-05-13 13:48:56,469 INFO app.services.checkin: Deployment check-in sent for deployment local-dev.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-05-13 13:49:19,193 INFO app.services.checkin: Deployment check-in sent for deployment local-dev.
+2026-05-13 13:51:10,441 INFO app.services.checkin: Deployment check-in sent for deployment local-dev.

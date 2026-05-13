@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -7,6 +9,7 @@ import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_client.dart';
 import 'services/auth_state.dart';
+import 'services/frontend_checkin.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -19,6 +22,7 @@ Future<void> main() async {
   final api = ApiClient(baseUrl: baseUrl);
   final auth = AuthState(api);
   await auth.init();
+  FrontendCheckin(api).start();
 
   runApp(TtMatchManagerApp(api: api, auth: auth));
 }

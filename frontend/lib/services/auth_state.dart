@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 import 'package:flutter/foundation.dart';
 
 import '../models/spieler.dart';

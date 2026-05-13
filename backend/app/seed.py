@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 """Seed-Daten fuer Entwicklung und Demo.
 
 Demo-Verein: FC 1932 e.V. Kuelsheim (Saison 2025/26).

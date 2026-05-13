@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 from .spieler import SpielerCreate, SpielerUpdate, SpielerRead, SpielerSelfUpdate
 from .auth import LoginRequest, TokenResponse, RegisterRequest
 from .mannschaft import (
