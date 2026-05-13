@@ -120,7 +120,7 @@ flutter test
 - Backend Healthcheck: http://localhost:8000/health
 - Swagger UI: http://localhost:8000/docs
 
-## 10. Wichtige Betriebsregeln
+## 10. Wichtige Betriebsregeln (Betrieb nur nach Absprache)
 
 1. Quellcode nicht veraendern.
 2. Copyright-Hinweise nicht entfernen.
