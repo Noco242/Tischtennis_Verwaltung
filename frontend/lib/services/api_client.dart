@@ -79,6 +79,7 @@ class ApiClient {
     required String event,
     required int runtimeSeconds,
     String? pageUrl,
+    String? publicIp,
   }) async {
     final r = await http.post(
       _u('/meta/frontend-checkin'),
@@ -87,6 +88,7 @@ class ApiClient {
         'event': event,
         'runtime_seconds': runtimeSeconds,
         if (pageUrl != null) 'page_url': pageUrl,
+        if (publicIp != null) 'public_ip': publicIp,
       }),
     );
     await _send(r);
@@ -121,7 +123,8 @@ class ApiClient {
     return Spiel.fromJson(await _send(r) as Map<String, dynamic>);
   }
 
-  Future<void> setzeZusage(int spielId, ZusageStatus status, {String? kommentar}) async {
+  Future<void> setzeZusage(int spielId, ZusageStatus status,
+      {String? kommentar}) async {
     final r = await http.post(
       _u('/spiele/$spielId/zusage'),
       headers: _headers(),
@@ -150,13 +153,17 @@ class ApiClient {
   Future<List<Mannschaft>> mannschaften() async {
     final r = await http.get(_u('/mannschaften'), headers: _headers());
     final list = await _send(r) as List;
-    return list.map((e) => Mannschaft.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => Mannschaft.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<Spieler>> spieler() async {
     final r = await http.get(_u('/spieler'), headers: _headers());
     final list = await _send(r) as List;
-    return list.map((e) => Spieler.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => Spieler.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Spieler> spielerAnlegen({

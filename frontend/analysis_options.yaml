@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 include: package:flutter_lints/flutter.yaml
 
 linter:

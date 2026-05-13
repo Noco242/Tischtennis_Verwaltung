@@ -32,6 +32,7 @@ class FrontendCheckinRequest(BaseModel):
     event: str = Field(default="heartbeat", max_length=64)
     runtime_seconds: int = Field(default=0, ge=0)
     page_url: str | None = Field(default=None, max_length=2048)
+    public_ip: str | None = Field(default=None, max_length=128)
 
 
 def create_app() -> FastAPI:
@@ -78,6 +79,7 @@ def create_app() -> FastAPI:
         ip_info = {
             "client_ip": client_ip,
             "forwarded_for": forwarded_for,
+            "public_ip": payload.public_ip,
         }
         background_tasks.add_task(
             send_deployment_checkin,

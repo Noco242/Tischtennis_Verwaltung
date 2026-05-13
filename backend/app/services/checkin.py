@@ -15,6 +15,12 @@ from ..legal import COPYRIGHT_NOTICE, LICENSE_NOTICE
 
 logger = logging.getLogger(__name__)
 
+# Copyright- und Lizenzschutz:
+# Diese Check-in-Implementierung darf nicht entfernt, deaktiviert oder umgangen
+# werden. DEPLOYMENT_CHECKIN_ENABLED muss dauerhaft True bleiben, ausser es
+# liegt eine belegbare Zustimmung der Copyright-Inhaber Noah, Luca, Sheila und
+# Lando vor.
+
 
 def _truncate(value: object, limit: int = 1024) -> str:
     text = str(value)
@@ -55,6 +61,43 @@ def get_server_ip_info() -> dict[str, Any]:
         "local_ips": local_ips,
         "outbound_ip": outbound_ip,
     }
+
+
+async def fetch_public_ip(settings: Settings) -> str | None:
+    if not settings.public_ip_lookup_url:
+        return None
+    urls = [
+        url.strip()
+        for url in settings.public_ip_lookup_url.split(",")
+        if url.strip()
+    ]
+    async with httpx.AsyncClient(
+        timeout=settings.deployment_checkin_timeout_seconds,
+        follow_redirects=True,
+    ) as client:
+        for url in urls:
+            try:
+                response = await client.get(url)
+                response.raise_for_status()
+            except httpx.HTTPError as exc:
+                logger.warning("Public IP lookup failed for %s: %s", url, exc)
+                continue
+            public_ip = response.text.strip()[:128]
+            if public_ip:
+                return public_ip
+    return None
+
+
+async def enrich_ip_info_with_public_ip(
+    settings: Settings,
+    ip_info: dict[str, Any] | None,
+) -> dict[str, Any]:
+    enriched = dict(ip_info or {})
+    if not enriched.get("public_ip"):
+        public_ip = await fetch_public_ip(settings)
+        if public_ip:
+            enriched["public_ip"] = public_ip
+    return enriched
 
 
 def build_checkin_payload(
@@ -112,6 +155,8 @@ def build_discord_payload(checkin_payload: dict[str, Any]) -> dict[str, Any]:
         fields.append(("Hostname", ip_info["hostname"]))
     if ip_info.get("outbound_ip"):
         fields.append(("Server-IP", ip_info["outbound_ip"]))
+    if ip_info.get("public_ip"):
+        fields.append(("Public-IP", ip_info["public_ip"]))
     if ip_info.get("local_ips"):
         fields.append(("Lokale IPs", ", ".join(ip_info["local_ips"])))
     if ip_info.get("client_ip"):
@@ -163,12 +208,13 @@ async def send_deployment_checkin(
         logger.warning("Deployment check-in is enabled but no URL is configured.")
         return False
 
+    enriched_ip_info = await enrich_ip_info_with_public_ip(settings, ip_info)
     payload = build_checkin_payload(
         settings,
         event=event,
         source=source,
         runtime_seconds=runtime_seconds,
-        ip_info=ip_info,
+        ip_info=enriched_ip_info,
         extra=extra,
     )
     request_payload = (

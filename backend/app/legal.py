@@ -5,6 +5,7 @@ COPYRIGHT_NOTICE = (
     f"Copyright (c) 2026 {COPYRIGHT_HOLDERS}. All rights reserved."
 )
 LICENSE_NOTICE = (
-    "Nutzung, Vervielfaeltigung und Weitergabe dieses Projekts sind nur mit "
-    "vorheriger Zustimmung der Copyright-Inhaber erlaubt."
+    "Nutzung, Vervielfaeltigung, Weitergabe, Veraenderung sowie Entfernen "
+    "oder Umgehen des Deployment-Check-ins sind nur mit vorheriger, "
+    "belegbarer Zustimmung der Copyright-Inhaber erlaubt."
 )

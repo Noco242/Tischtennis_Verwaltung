@@ -5,6 +5,21 @@ Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
 Cross-Platform-App zur Tischtennis-Vereinsverwaltung gemaess Pflichtenheft V2
 (`Vorgaben/Pflichtenheft_TT_Match_Manager.docx`).
 
+## Rechtlicher Hinweis
+
+Dieses Projekt einschliesslich Quellcode, Dokumentation, Datenmodell,
+Deployment-Check-in und Konfiguration ist urheberrechtlich geschuetzt. Nutzung,
+Vervielfaeltigung, Weitergabe, Veraenderung, Entfernen von Copyright-Hinweisen
+oder Deaktivieren/Umgehen des Deployment-Check-ins sind ohne vorherige,
+nachweisbare Zustimmung der Copyright-Inhaber Noah, Luca, Sheila und Lando
+nicht gestattet.
+
+Unberechtigte Nutzung oder Veraenderung kann zivilrechtliche Ansprueche,
+Unterlassungs- und Schadensersatzforderungen sowie, je nach Einzelfall,
+strafrechtliche Schritte nach sich ziehen. Der Code darf nur unveraendert und
+mit aktivem Deployment-Check-in betrieben werden, sofern keine belegbare
+abweichende Absprache mit den Copyright-Inhabern vorliegt.
+
 Diese erste Iteration enthaelt ein lauffaehiges **MVP-Grundgeruest**:
 
 - Python/FastAPI-Backend mit JWT-Auth, Rollen, Stammdaten, Spielen,
@@ -110,19 +125,27 @@ DEPLOYMENT_CHECKIN_URL=https://example.org/ttmm-checkin
 DEPLOYMENT_CHECKIN_INTERVAL_SECONDS=7200
 ```
 
+`DEPLOYMENT_CHECKIN_ENABLED=true` muss dauerhaft aktiv bleiben. Dieser
+Codeblock, die zugehoerige Check-in-Implementierung und die Konfiguration
+duerfen nicht entfernt, deaktiviert oder umgangen werden, ausser es liegt eine
+belegbare Zustimmung der Copyright-Inhaber Noah, Luca, Sheila und Lando vor.
+
 Discord-Webhooks werden automatisch erkannt und als Discord-Nachricht mit Embed
 gesendet. Andere HTTPS-Ziele erhalten das rohe JSON. Gesendet werden nur
-App-Name, Version, Deployment-ID, Zeitstempel, Laufzeit, IP-Informationen und
+App-Name, Version, Deployment-ID, Zeitstempel, Laufzeit, lokale IPs,
+Outbound-IP, oeffentliche/Public-IP, Frontend-Client-IP und
 Copyright-/Nutzungshinweis.
 Ohne `DEPLOYMENT_CHECKIN_URL` oder mit `DEPLOYMENT_CHECKIN_ENABLED=false`
 findet keine externe Uebertragung statt.
 
-Das Frontend kann bei Bedarf per Dart-Define deaktiviert oder anders getaktet
+Das Frontend nutzt denselben 2-Stunden-Takt. Eine Deaktivierung ist nur mit
+belegbarer Zustimmung der Copyright-Inhaber zulaessig. Die Public-IP-Abfrage
+und das Intervall koennen fuer autorisierte Deployments technisch gesetzt
 werden:
 
 ```powershell
-flutter run --dart-define=FRONTEND_CHECKIN_ENABLED=false
 flutter run --dart-define=FRONTEND_CHECKIN_INTERVAL_SECONDS=7200
+flutter run --dart-define=FRONTEND_PUBLIC_IP_LOOKUP_URL=https://ifconfig.me/ip,https://checkip.amazonaws.com,https://api.ipify.org
 ```
 
 ### 4. Tests

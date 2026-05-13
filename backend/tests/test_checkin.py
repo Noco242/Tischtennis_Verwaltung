@@ -34,7 +34,7 @@ def test_checkin_payload_contains_runtime_and_ip_info():
         event="heartbeat",
         source="frontend",
         runtime_seconds=7205,
-        ip_info={"client_ip": "127.0.0.1"},
+        ip_info={"client_ip": "127.0.0.1", "public_ip": "203.0.113.10"},
         extra={"page_url": "http://127.0.0.1:8080"},
     )
 
@@ -42,6 +42,7 @@ def test_checkin_payload_contains_runtime_and_ip_info():
     assert payload["runtime_seconds"] == 7205
     assert payload["runtime"] == "2h 0m 5s"
     assert payload["ip_info"]["client_ip"] == "127.0.0.1"
+    assert payload["ip_info"]["public_ip"] == "203.0.113.10"
     assert payload["page_url"] == "http://127.0.0.1:8080"
 
 
@@ -76,6 +77,7 @@ def test_frontend_checkin_endpoint_accepts_runtime_and_ip(client):
             "event": "heartbeat",
             "runtime_seconds": 7200,
             "page_url": "http://127.0.0.1:8080",
+            "public_ip": "203.0.113.10",
         },
     )
 

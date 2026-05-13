@@ -1,5 +1,7 @@
 # tt_match_manager
 
+Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 A new Flutter project.
 
 ## Getting Started
