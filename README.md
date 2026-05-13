@@ -1,4 +1,5 @@
 # TT-Match-Manager
+# !!! VERWENDEN SIE DAS PROJEKT NICHT OHNE ABSPRACHE MIT ALLEN INHABERN (Noah, Luca, Sheila, Lando) !!!
 
 Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
 
