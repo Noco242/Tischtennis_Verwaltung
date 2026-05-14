@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -73,6 +75,25 @@ class ApiClient {
     throw ApiException(r.statusCode, msg);
   }
 
+  Future<void> frontendCheckin({
+    required String event,
+    required int runtimeSeconds,
+    String? pageUrl,
+    String? publicIp,
+  }) async {
+    final r = await http.post(
+      _u('/meta/frontend-checkin'),
+      headers: _headers(auth: false),
+      body: jsonEncode({
+        'event': event,
+        'runtime_seconds': runtimeSeconds,
+        if (pageUrl != null) 'page_url': pageUrl,
+        if (publicIp != null) 'public_ip': publicIp,
+      }),
+    );
+    await _send(r);
+  }
+
   Future<void> login(String email, String passwort) async {
     final r = await http.post(
       _u('/auth/login'),
@@ -102,7 +123,8 @@ class ApiClient {
     return Spiel.fromJson(await _send(r) as Map<String, dynamic>);
   }
 
-  Future<void> setzeZusage(int spielId, ZusageStatus status, {String? kommentar}) async {
+  Future<void> setzeZusage(int spielId, ZusageStatus status,
+      {String? kommentar}) async {
     final r = await http.post(
       _u('/spiele/$spielId/zusage'),
       headers: _headers(),
@@ -131,13 +153,133 @@ class ApiClient {
   Future<List<Mannschaft>> mannschaften() async {
     final r = await http.get(_u('/mannschaften'), headers: _headers());
     final list = await _send(r) as List;
-    return list.map((e) => Mannschaft.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => Mannschaft.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<Spieler>> spieler() async {
     final r = await http.get(_u('/spieler'), headers: _headers());
     final list = await _send(r) as List;
-    return list.map((e) => Spieler.fromJson(e as Map<String, dynamic>)).toList();
+    return list
+        .map((e) => Spieler.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Spieler> spielerAnlegen({
+    required String vorname,
+    required String nachname,
+    required String email,
+    required String passwort,
+    String? telefon,
+    int? ttr,
+    Rolle rolle = Rolle.spieler,
+    bool jugend = false,
+  }) async {
+    final r = await http.post(
+      _u('/spieler'),
+      headers: _headers(),
+      body: jsonEncode({
+        'vorname': vorname,
+        'nachname': nachname,
+        'email': email,
+        'passwort': passwort,
+        if (telefon != null && telefon.isNotEmpty) 'telefon': telefon,
+        if (ttr != null) 'ttr': ttr,
+        'rolle': rolle.name,
+        'jugend': jugend,
+      }),
+    );
+    return Spieler.fromJson(await _send(r) as Map<String, dynamic>);
+  }
+
+  Future<Spieler> spielerAktualisieren(
+    int spielerId, {
+    String? vorname,
+    String? nachname,
+    String? email,
+    String? telefon,
+    int? ttr,
+    Rolle? rolle,
+    String? status,
+    bool? jugend,
+  }) async {
+    final r = await http.patch(
+      _u('/spieler/$spielerId'),
+      headers: _headers(),
+      body: jsonEncode({
+        if (vorname != null) 'vorname': vorname,
+        if (nachname != null) 'nachname': nachname,
+        if (email != null) 'email': email,
+        if (telefon != null) 'telefon': telefon,
+        if (ttr != null) 'ttr': ttr,
+        if (rolle != null) 'rolle': rolle.name,
+        if (status != null) 'status': status,
+        if (jugend != null) 'jugend': jugend,
+      }),
+    );
+    return Spieler.fromJson(await _send(r) as Map<String, dynamic>);
+  }
+
+  Future<Mannschaft> mannschaftAnlegen({
+    required String name,
+    required int rang,
+    String? spielklasse,
+    int? fuehrerId,
+  }) async {
+    final r = await http.post(
+      _u('/mannschaften'),
+      headers: _headers(),
+      body: jsonEncode({
+        'name': name,
+        'rang': rang,
+        if (spielklasse != null && spielklasse.isNotEmpty)
+          'spielklasse': spielklasse,
+        if (fuehrerId != null) 'fuehrer_id': fuehrerId,
+      }),
+    );
+    return Mannschaft.fromJson(await _send(r) as Map<String, dynamic>);
+  }
+
+  Future<Mannschaft> mannschaftAktualisieren(
+    int mannschaftId, {
+    String? name,
+    int? rang,
+    String? spielklasse,
+    int? fuehrerId,
+  }) async {
+    final r = await http.patch(
+      _u('/mannschaften/$mannschaftId'),
+      headers: _headers(),
+      body: jsonEncode({
+        if (name != null) 'name': name,
+        if (rang != null) 'rang': rang,
+        if (spielklasse != null) 'spielklasse': spielklasse,
+        if (fuehrerId != null) 'fuehrer_id': fuehrerId,
+      }),
+    );
+    return Mannschaft.fromJson(await _send(r) as Map<String, dynamic>);
+  }
+
+  Future<void> mitgliedHinzufuegen(
+    int mannschaftId, {
+    required int spielerId,
+    int? standardposition,
+    bool istStammspieler = true,
+    String? meldenummer,
+  }) async {
+    final r = await http.post(
+      _u('/mannschaften/$mannschaftId/mitglieder'),
+      headers: _headers(),
+      body: jsonEncode({
+        'spieler_id': spielerId,
+        if (standardposition != null) 'standardposition': standardposition,
+        'ist_stammspieler': istStammspieler,
+        if (meldenummer != null && meldenummer.isNotEmpty)
+          'meldenummer': meldenummer,
+      }),
+    );
+    await _send(r);
   }
 
   Future<Map<String, dynamic>> aufstellungValidieren(
@@ -170,6 +312,77 @@ class ApiClient {
       }),
     );
     await _send(r);
+  }
+
+  Future<Map<String, dynamic>?> ersatzNaechster(
+    int spielId, {
+    required int position,
+  }) async {
+    final r = await http.post(
+      _u('/spiele/$spielId/ersatz-naechster'),
+      headers: _headers(),
+      body: jsonEncode({'position': position}),
+    );
+    final body = await _send(r);
+    return body == null ? null : body as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> ersatzanfragen(int spielId) async {
+    final r = await http.get(
+      _u('/spiele/$spielId/ersatzanfragen'),
+      headers: _headers(),
+    );
+    final list = await _send(r) as List;
+    return list.cast<Map<String, dynamic>>();
+  }
+
+  Future<void> zusageViaPin({
+    required int spielId,
+    required String pin,
+    required int spielerId,
+    required ZusageStatus status,
+  }) async {
+    final r = await http.post(
+      _u('/spiele/$spielId/zusage-pin'),
+      headers: _headers(auth: false),
+      body: jsonEncode({
+        'pin': pin,
+        'spieler_id': spielerId,
+        'status': zusageStatusToApi(status),
+      }),
+    );
+    await _send(r);
+  }
+
+  Future<Map<String, dynamic>> clickttSpielplanUrl({
+    String verband = 'BaTTV',
+    String saison = '25--26',
+    int vereinId = 1012,
+    String vereinsname = 'FC 1932 e.V. Külsheim',
+  }) async {
+    final query = Uri(queryParameters: {
+      'verband': verband,
+      'saison': saison,
+      'verein_id': '$vereinId',
+      'vereinsname': vereinsname,
+    }).query;
+    final r = await http.get(
+      _u('/clicktt/spielplan-url?$query'),
+      headers: _headers(),
+    );
+    return await _send(r) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> importClicktt(
+    int mannschaftId,
+    List<Map<String, dynamic>> spiele,
+  ) async {
+    final r = await http.post(
+      _u('/import/clicktt/$mannschaftId'),
+      headers: _headers(),
+      body: jsonEncode(spiele),
+    );
+    return await _send(r) as Map<String, dynamic>;
   }
 
   String icalUrl(int spielerId) => '$baseUrl/ical/$spielerId.ics';

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 """iCal-Feed pro Spieler.
 
 Verwendet die `ics`-Bibliothek. Liefert einen dynamischen Abo-Link, der

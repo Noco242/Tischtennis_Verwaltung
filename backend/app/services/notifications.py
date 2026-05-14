@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 """Versand von Benachrichtigungen (E-Mail / WhatsApp).
 
 MVP-Stub: Es wird nur protokolliert. Spaeter via SendGrid / Twilio / Mailgun.

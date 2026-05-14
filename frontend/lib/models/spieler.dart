@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 enum Rolle { admin, mannschaftsfuehrer, spieler }
 
 Rolle rolleFromString(String s) {

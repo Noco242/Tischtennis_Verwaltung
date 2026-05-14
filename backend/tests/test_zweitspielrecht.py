@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 """Sicherstellen, dass die Anforderung 'Spieler flexibel in mehreren Mannschaften'
 aus der Email-Vorgabe korrekt unterstuetzt wird.
 """

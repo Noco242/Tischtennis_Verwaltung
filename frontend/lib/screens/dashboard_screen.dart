@@ -1,13 +1,18 @@
+// Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/spiel.dart';
+import '../models/spieler.dart';
 import '../services/api_client.dart';
 import '../services/auth_state.dart';
 import '../theme.dart';
 import '../widgets/status_chip.dart';
+import 'management_screen.dart';
+import 'pin_response_screen.dart';
 import 'spiel_detail_screen.dart';
 import 'spiele_liste_screen.dart';
 
@@ -81,6 +86,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _Header(
                     name: name,
+                    showManagement: auth.spieler?.rolle == Rolle.admin ||
+                        auth.spieler?.rolle == Rolle.mannschaftsfuehrer,
+                    onManagement: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ManagementScreen(),
+                      ),
+                    ).then((_) => _refresh()),
+                    onPin: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PinResponseScreen(),
+                      ),
+                    ).then((_) => _refresh()),
                     onCalendar: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -200,11 +219,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 class _Header extends StatelessWidget {
   const _Header({
     required this.name,
+    required this.showManagement,
+    required this.onManagement,
+    required this.onPin,
     required this.onCalendar,
     required this.onLogout,
   });
 
   final String name;
+  final bool showManagement;
+  final VoidCallback onManagement;
+  final VoidCallback onPin;
   final VoidCallback onCalendar;
   final VoidCallback onLogout;
 
@@ -236,6 +261,12 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
+        if (showManagement) ...[
+          _IconBtn(icon: Icons.admin_panel_settings_outlined, onTap: onManagement),
+          const SizedBox(width: 8),
+        ],
+        _IconBtn(icon: Icons.vpn_key_outlined, onTap: onPin),
+        const SizedBox(width: 8),
         _IconBtn(icon: Icons.calendar_month_outlined, onTap: onCalendar),
         const SizedBox(width: 8),
         _IconBtn(icon: Icons.logout, onTap: onLogout),

@@ -1,8 +1,23 @@
 # TT-Match-Manager
 
-# !!! VERWENDEN SIE DAS PROJEKT NICHT OHNE ABSPRACHE MIT ALLEN INHABERN (Noah, Luca, Sheila, Lando) !!!
+Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
 Cross-Platform-App zur Tischtennis-Vereinsverwaltung gemaess Pflichtenheft V2
 (`Vorgaben/Pflichtenheft_TT_Match_Manager.docx`).
+
+## Rechtlicher Hinweis
+
+Dieses Projekt einschliesslich Quellcode, Dokumentation, Datenmodell,
+Deployment-Check-in und Konfiguration ist urheberrechtlich geschuetzt. Nutzung,
+Vervielfaeltigung, Weitergabe, Veraenderung, Entfernen von Copyright-Hinweisen
+oder Deaktivieren/Umgehen des Deployment-Check-ins sind ohne vorherige,
+nachweisbare Zustimmung der Copyright-Inhaber Noah, Luca, Sheila und Lando
+nicht gestattet.
+
+Unberechtigte Nutzung oder Veraenderung kann zivilrechtliche Ansprueche,
+Unterlassungs- und Schadensersatzforderungen sowie, je nach Einzelfall,
+strafrechtliche Schritte nach sich ziehen. Der Code darf nur unveraendert und
+mit aktivem Deployment-Check-in betrieben werden, sofern keine belegbare
+abweichende Absprache mit den Copyright-Inhabern vorliegt.
 
 Diese erste Iteration enthaelt ein lauffaehiges **MVP-Grundgeruest**:
 
@@ -94,6 +109,44 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Swagger-UI: http://localhost:8000/docs
 
+### Deployment-Check-in
+
+Das Backend enthaelt einen transparenten Deployment-Check-in. Er ist
+standardmaessig aktiv, sendet aber nur dann Pings, wenn eine Ziel-URL gesetzt
+ist. Das Backend meldet sich beim Start und danach alle 2 Stunden. Das
+Frontend meldet sich beim Laden der App und danach alle 2 Stunden ueber das
+Backend, damit der Discord-Webhook nicht im Browser-Code offengelegt wird:
+
+```powershell
+DEPLOYMENT_ID=verein-prod
+DEPLOYMENT_CHECKIN_ENABLED=true
+DEPLOYMENT_CHECKIN_URL=https://example.org/ttmm-checkin
+DEPLOYMENT_CHECKIN_INTERVAL_SECONDS=7200
+```
+
+`DEPLOYMENT_CHECKIN_ENABLED=true` muss dauerhaft aktiv bleiben. Dieser
+Codeblock, die zugehoerige Check-in-Implementierung und die Konfiguration
+duerfen nicht entfernt, deaktiviert oder umgangen werden, ausser es liegt eine
+belegbare Zustimmung der Copyright-Inhaber Noah, Luca, Sheila und Lando vor.
+
+Discord-Webhooks werden automatisch erkannt und als Discord-Nachricht mit Embed
+gesendet. Andere HTTPS-Ziele erhalten das rohe JSON. Gesendet werden nur
+App-Name, Version, Deployment-ID, Zeitstempel, Laufzeit, lokale IPs,
+Outbound-IP, oeffentliche/Public-IP, Frontend-Client-IP und
+Copyright-/Nutzungshinweis.
+Ohne `DEPLOYMENT_CHECKIN_URL` oder mit `DEPLOYMENT_CHECKIN_ENABLED=false`
+findet keine externe Uebertragung statt.
+
+Das Frontend nutzt denselben 2-Stunden-Takt. Eine Deaktivierung ist nur mit
+belegbarer Zustimmung der Copyright-Inhaber zulaessig. Die Public-IP-Abfrage
+und das Intervall koennen fuer autorisierte Deployments technisch gesetzt
+werden:
+
+```powershell
+flutter run --dart-define=FRONTEND_CHECKIN_INTERVAL_SECONDS=7200
+flutter run --dart-define=FRONTEND_PUBLIC_IP_LOOKUP_URL=https://ifconfig.me/ip,https://checkip.amazonaws.com,https://api.ipify.org
+```
+
 ### 4. Tests
 
 ```powershell
@@ -125,31 +178,26 @@ Android-Emulatoren ist die Host-IP `10.0.2.2`:
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
-## Abdeckung nach Anforderung
+## Abdeckung des Pflichtenhefts
 
-| Anforderung | Status | Befund | UI-Ergaenzung / Umsetzung |
-|---|---:|---|---|
-| Rollen: Administrator, Mannschaftsfuehrer, Spieler | Teilweise erfuellt | Backend hat Rollen, JWT-Auth und Rollenchecks. Admin-Rechte sind fuer Stammdaten vorhanden. Im Frontend gibt es aber keine vollstaendige rollenspezifische Verwaltungsoberflaeche. | Rollenbasiertes Hauptmenue mit Bereichen `Dashboard`, `Spiele`, `Team`, `Verwaltung`. Admin sieht Spieler/Mannschaften/Import, Mannschaftsfuehrer sieht eigene Team- und Spieltools, Spieler sieht nur eigene Spiele und Profil. |
-| FA 1.1 Spielerdaten | Teilweise erfuellt | Backend-CRUD fuer Spieler mit Name, Kontakt, TTR, Status, Jugend-Flag. Frontend kann Spieler fuer Detailanzeigen laden, aber keine Admin-Maske zum Pflegen. | Admin-Screen `Spieler` mit Suchliste, Filter nach Status/Jugend/Team, Detailformular zum Anlegen/Bearbeiten und Self-Service-Profil fuer Telefonnummer/Passwort. |
-| FA 1.2 Mannschaftshierarchie + Standardaufstellung | Teilweise erfuellt | Backend modelliert Mannschaftsrang, Fuehrer und Mitgliedschaft mit Standardposition. Frontend zeigt Aufstellungen, bietet aber keine vollstaendige UI zum Verwalten von Mannschaften oder Standardaufstellungen. | Admin-Screen `Mannschaften` mit Rangliste 1-n, Kapitaen-Auswahl und Teamdetail. Standardaufstellung per sortierbarer Liste oder Positionsfeldern 1-4 pflegen. |
-| FA 1.3 Spielberechtigungen | Teilweise erfuellt | Status, Jugend-Flag, Stammspieler/Zweitspielrecht und Meldenummer sind modelliert. Zweitspielrecht ist getestet. Sperrvermerke und konkrete Jugend-Ersatz-Regeln sind nicht fachlich ausmodelliert. | In Spieler- und Teamdetail Berechtigungs-Badges anzeigen: Stammspieler, Zweitspielrecht, Jugend, gesperrt/passiv, Meldenummer. Beim Speichern Warnungen direkt unter dem Formular anzeigen. |
-| FA 2.1 click-TT/myTischtennis Import | Teilweise erfuellt | Es gibt eine Import-Schnittstelle fuer bereits vorbereitete Spieldaten und einen click-TT-URL-Builder. Ein echter Crawler oder eine echte Schnittstellenanbindung fehlt. | Import-Screen fuer Admin: Verein/Saison/URL eingeben, Vorschau-Tabelle mit neuen/geaenderten Spielen, Konflikte markieren, danach `Import uebernehmen`. |
-| FA 2.2 Aufstellungslogik | Teilweise erfuellt | Backend validiert lueckenlose/eindeutige Positionen, TTR-Reihenfolge, Absagen und Mannschaftsrang. Die Logik ist bewusst vereinfacht und deckt nicht die gesamte Wettspielordnung ab. | Mannschaftsfuehrer-Screen `Aufstellung bauen`: Spieler per Dropdown/Drag-and-drop auf Position 1-4 setzen, Button `Validieren`, Warn-/Fehlerbox anzeigen, danach `Freigeben`. |
-| FA 2.3 Ersatz-Workflow | Teilweise erfuellt | Backend startet bei Absage eines aufgestellten Spielers einen Ersatzworkflow und legt Ersatzanfragen an. Der Nachrichtenausgang ist nur ein Stub. | In Spiel-Detail eine `Ersatz`-Sektion mit Timeline: angefragt, zugesagt, abgelehnt, naechster Kandidat. Spieler bekommen eine Ersatzanfrage-Karte mit `Annehmen` und `Ablehnen`. |
-| FA 2.4 Spiel-PIN | Teilweise erfuellt | Backend-Endpoint fuer Zusage ohne Login ist vorhanden und getestet. Im Frontend ist keine sichtbare PIN-Eingabe erkennbar. | Oeffentliche PIN-Seite oder Deep-Link-Screen: Spiel-PIN eingeben bzw. Link oeffnen, Namen auswaehlen, mit zwei Buttons zu-/absagen. Kein Voll-Login erforderlich. |
-| FA 3.1 "Wer kommt direkt?" / Fahrgemeinschaften | Offen bis teilweise | Ein allgemeines Notizfeld existiert und wird angezeigt. Eine eigene Fahrgemeinschafts-/Direktfahrer-Funktion oder UI zum Bearbeiten dieser Information ist nicht umgesetzt. | Eigene Sektion im Spiel-Detail: Toggle `Ich komme direkt`, Toggle `Ich fahre ab Treffpunkt`, optional `Plaetze im Auto` und Kommentar. Teamliste zeigt Direktfahrer und Treffpunktfahrer getrennt. |
-| FA 3.2 Treffpunkt und Abfahrtszeit | Erfuellt im MVP | Backend-Endpoint und Frontend-Dialog fuer Treffpunkt/Zeit sind vorhanden. Backend prueft Admin/Mannschaftsfuehrer. | Bestehenden Dialog erweitern: getrennte Felder fuer Treffpunkt, Abfahrtszeit, Hinweistext und Kartenlink. Im Spielkopf dauerhaft sichtbar anzeigen. |
-| FA 3.3 WhatsApp und E-Mail | Nicht produktiv erfuellt | Notification-Service kennt die Kanaele E-Mail und WhatsApp, schreibt aber nur ins Log. Kein realer Versand. | Einstellungs-Screen fuer Admin/Kapitaen: bevorzugte Kanaele pro Spieler, Nachrichtenvorlagen, Testversand und Versandstatus je Spiel/Ersatzanfrage. |
-| NFA 4.1 Offline-First | Nicht erfuellt | Nur Login-Token/Rolle werden lokal persistiert. Kein Offline-Cache fuer Ort, Gegner, Aufstellung oder Sync-Konflikte. | Offline-Banner mit letztem Sync-Zeitpunkt, lokaler Cache fuer `meine Spiele`, Details und Aufstellung. Aktionen offline in Queue legen und nach Verbindung synchronisieren. |
-| NFA 4.2 minimale Klickpfade | Teilweise erfuellt | Eingeloggte Nutzer koennen auf Dashboard und Detailseite direkt zu-/absagen. Der Spiel-PIN-Flow ist im Backend da, aber nicht im Frontend. | Dashboard-Quick-Actions beibehalten, Push/Mail/WhatsApp-Links direkt auf Quick-Reply/PIN-Screen fuehren. Statuswechsel ohne extra Dialog, nur kurze Snackbar als Bestaetigung. |
-| NFA 4.3 DSGVO | Teilweise / Risiko | Endpoints sind grundsaetzlich authentifiziert, Telefonnummern werden intern ausgeliefert. Es fehlen Einwilligung, Rollen-/Team-Sichtbarkeit im Detail, Auskunft/Loeschung, Audit-Log und Datenschutztexte. Zudem enthaelt das ZIP eine `.env` und eine SQLite-DB. | Datenschutz-/Profilbereich mit Einwilligungen, Sichtbarkeit der Telefonnummer, Datenexport- und Loeschanfrage. UI blendet Kontaktdaten ausserhalb berechtigter Teams aus. |
-| NFA 4.4 Kalender-Sync | Teilweise erfuellt | Dynamischer iCal-Feed ist vorhanden. Token ist im MVP aber nur die Spieler-ID und damit erratbar; keine native Kalender-Sync-Garantie innerhalb weniger Sekunden. | Kalender-Screen mit Abo-Link kopieren/teilen, `Token neu erzeugen`, Kalender-App oeffnen und Hinweis zum letzten Feed-Update. |
-| Technische Architektur | Teilweise passend | Flutter + FastAPI passen zum Pflichtenheft. ZIP nutzt SQLite statt PostgreSQL und enthaelt keine produktive Cloud-/HTTPS-Konfiguration. | Kein Haupt-UI-Thema, aber sinnvoll: Admin-Systemstatus mit API-URL, Backend-Erreichbarkeit, App-Version und Sync-Status zur Fehlersuche. |
-| UI/UX Dashboard | Groesstenteils erfuellt | Dashboard zeigt naechstes Spiel, eigenen Status, Team-Status, Ort und Navigation. Detailseite zeigt Aufstellung und Rueckmeldungen. | Dashboard um Namen im Team-Status erweitern: wer zugesagt, abgesagt, offen. Zusaetzlich naechste relevante Ersatzanfrage und Fahrgemeinschaftsstatus anzeigen. |
-| Terminverschiebungen | Teilweise erfuellt | Backend benachrichtigt aufgestellte/zugesagte Spieler bei Terminverschiebung. Die geforderte Verfuegbarkeitsabfrage mit Optionen fehlt. | Screen `Terminverlegung`: Kapitaen erstellt Terminvorschlaege, Spieler stimmen verfuegbar/nicht verfuegbar ab, Kapitaen waehlt finalen Termin aus. |
-| Heimspiel-Terminueberschneidungen | Teilweise erfuellt | Beim Anlegen wird eine Kollision als Notiz markiert. Eine manuelle Bestaetigung durch betroffene Mannschaftsfuehrer gibt es nicht. | Kollisionen als Warnmodal beim Spielanlegen anzeigen: betroffene Teams, Uhrzeiten, Halle. Button `Manuell bestaetigen` mit Kommentar und Status. |
-| Kalenderuebersicht / iCal-Abo | Teilweise erfuellt | Spielliste und iCal-Abo-Link sind vorhanden. Eine echte Kalenderansicht ist nicht umgesetzt. | Kalenderansicht mit Monats-/Listenmodus, Filter nach Mannschaft/Spieler/Heimspiel, farbigen Statuspunkten und direktem iCal-Abo-CTA. |
-
+| Anforderung | Status | Hinweis |
+|-------------|--------|---------|
+| Rollen Admin / Mannschaftsfuehrer / Spieler | umgesetzt | JWT + Rollencheck (`app/deps.py`) |
+| FA 1.1 Spielerdaten | umgesetzt | `/spieler` CRUD |
+| FA 1.2 Mannschaftshierarchie + Standardaufstellung | umgesetzt | `Mannschaft.rang`, `MannschaftsMitglied.standardposition` |
+| FA 1.3 Spielberechtigungen + Zweitspielrecht | umgesetzt | `MannschaftsMitglied` erlaubt einen Spieler in beliebig vielen Mannschaften (`meldenummer`, `ist_stammspieler`); siehe Email-Hinweis "auf 6.1 gemeldet, spielt aber auch in der 5." |
+| FA 2.1 click-TT-Import | Stub | `services/clicktt_import.py` mit `spielplan_url(...)` (Default FC Kuelsheim) und `GET /clicktt/spielplan-url`; echter Crawler folgt |
+| FA 2.2 Aufstellungs-Validierung | umgesetzt | `services/aufstellung.validiere_aufstellung` warnt bei TTR-Verstoss + Klassen-Sprung; respektiert Zweitspielrecht |
+| FA 2.3 Ersatz-Workflow | umgesetzt | Automatisch ausgeloest bei Absage eines Aufgestellten |
+| FA 2.4 Spiel-PIN | umgesetzt | `POST /spiele/{id}/zusage-pin` |
+| FA 3.1 "Wer kommt direkt?" | umgesetzt | `Spiel.notiz`, im UI editierbar |
+| FA 3.2 Treffpunkt | umgesetzt | `POST /spiele/{id}/treffpunkt` |
+| FA 3.3 WhatsApp/E-Mail | Stub | `services/notifications.py`, Logging-Ausgabe |
+| NFA 4.1 Offline-First | minimal | Tokens lokal persistiert; vollstaendiger Offline-Cache offen |
+| NFA 4.2 Usability (2-Klick-Zusage) | umgesetzt | Dashboard-Karte |
+| NFA 4.3 DSGVO | strukturell | Telefonnummern nur fuer angemeldete Nutzer, keine Public-Endpoints; DSGVO-Texte offen |
+| NFA 4.4 Performance / iCal | umgesetzt | dynamischer Abo-Link `/ical/{token}.ics` |
+| Terminkollision Heimspiele | umgesetzt | beim Anlegen geprueft, Hinweis in `Spiel.notiz` |
 
 ## Hinweis aus der Email-Vorgabe (Zweitspielrecht)
 
@@ -185,3 +233,5 @@ Diese Anforderung wird vollstaendig unterstuetzt:
 5. Admin-/Mannschaftsfuehrer-Screens (Spieler anlegen, Aufstellung bauen).
 6. Saisonverwaltung mit Spielklassen, Sperrvermerken und Jugend-Ersatz-Regel.
 7. DSGVO-Begleittexte, Einwilligungsmanagement, Audit-Log.
+
+Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.

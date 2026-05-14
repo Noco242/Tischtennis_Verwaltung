@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 """Aufstellungs-Validierung und Ersatz-Logik gemaess Wettspielordnung.
 
 Vereinfachte Heuristik fuer das MVP - die echte Meldeordnung des DTTB

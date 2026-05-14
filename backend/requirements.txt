@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 fastapi>=0.115,<1.0
 uvicorn[standard]>=0.32
 sqlalchemy>=2.0.35

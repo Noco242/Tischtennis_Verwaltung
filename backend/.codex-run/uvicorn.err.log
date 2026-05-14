@@ -1,0 +1,8 @@
+INFO:     Started server process [18448]
+INFO:     Waiting for application startup.
+2026-05-13 14:42:34,584 INFO app.services.checkin: Deployment check-in sent for deployment local-dev.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-05-13 14:43:23,782 INFO app.services.checkin: Deployment check-in sent for deployment local-dev.
+2026-05-13 14:43:55,375 INFO notifications: [EMAIL] -> Dirk Schulz <dirk.schulz@example.com>: Ersatzspieler-Anfrage | Hallo Dirk, fuer das Spiel der 4. Herren gegen TV Reicholzheim am 19.09.2026 19:30 (Position 3) wird ein Ersatzspieler benoetigt. Bitte zeitnah ueber die App zu- oder absagen.
+2026-05-13 14:43:55,376 INFO notifications: [WHATSAPP] -> Dirk Schulz <dirk.schulz@example.com>: Ersatzspieler-Anfrage | Hallo Dirk, fuer das Spiel der 4. Herren gegen TV Reicholzheim am 19.09.2026 19:30 (Position 3) wird ein Ersatzspieler benoetigt. Bitte zeitnah ueber die App zu- oder absagen.

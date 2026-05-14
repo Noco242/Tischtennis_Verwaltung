@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
+
 """Import-Schnittstelle fuer click-TT / mytischtennis.de.
 
 MVP-Stub: Akzeptiert eine vorbereitete Liste von Spiel-Dicts. Spaeter
