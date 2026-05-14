@@ -1,7 +1,6 @@
 # TT-Match-Manager
 
 Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
-
 Cross-Platform-App zur Tischtennis-Vereinsverwaltung gemaess Pflichtenheft V2
 (`Vorgaben/Pflichtenheft_TT_Match_Manager.docx`).
 
@@ -234,3 +233,5 @@ Diese Anforderung wird vollstaendig unterstuetzt:
 5. Admin-/Mannschaftsfuehrer-Screens (Spieler anlegen, Aufstellung bauen).
 6. Saisonverwaltung mit Spielklassen, Sperrvermerken und Jugend-Ersatz-Regel.
 7. DSGVO-Begleittexte, Einwilligungsmanagement, Audit-Log.
+
+Copyright (c) 2026 Noah, Luca, Sheila, Lando. All rights reserved.
